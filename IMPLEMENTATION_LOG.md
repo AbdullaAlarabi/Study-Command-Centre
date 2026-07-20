@@ -53,3 +53,4 @@ Verification:
 - Live seed: verified 2 courses, 4 assessment blocks, 28 learning units, and 0 schedule tasks.
 - Authentication verification: two email-confirmed Auth users exist; Khalid maps to `student` and Abdulla maps to `coach`. The frontend anon credentials can read both role rows.
 - GitHub `main` was force-replaced at commit `27e36dc`; the Pages build and deployment both passed.
+- Added a one-time service-worker and cache cleanup after the retired Fitness Desk PWA continued serving its offline shell from users' browsers.
