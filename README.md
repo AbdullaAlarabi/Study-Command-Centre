@@ -21,14 +21,36 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 The browser app must never receive a Supabase service-role key. A later phase uses `.env.seed` locally for idempotent seeding; that file is ignored by Git.
 
-## Supabase authentication setup
+## Supabase database and authentication setup
 
-Phase 1 expects a Supabase project with a `profiles` table. The complete schema arrives in Phase 2. To test role routing after that schema is applied:
+This project intentionally reuses the retired Fitness Desk Supabase project. The first section of [`supabase/schema.sql`](supabase/schema.sql) permanently drops all Fitness Desk tables and data before creating the Study Command Centre schema.
 
-1. In Supabase Authentication, manually create one student and one coach email/password user.
-2. Do not expose registration in the app.
-3. Add a matching `profiles` row for each Auth user. The row `id` must equal `auth.users.id`; set `role` to `student` or `coach`.
-4. Put the project URL and anon key in `.env.local` and restart Vite.
+1. Open the existing Supabase project and go to **SQL Editor**.
+2. Copy and run the complete `supabase/schema.sql` file. This deletion is irreversible.
+3. In **Authentication → Users**, remove any retired users and manually create exactly one student and one coach email/password user.
+4. In **Table Editor → profiles**, add one row for each Auth user. Copy the Auth user UUID into `id`, choose `student` or `coach` for `role`, and add a display name.
+5. Copy `.env.example` to `.env.local` and use the existing project's URL and anon key.
+6. Copy `.env.seed.example` to `.env.seed` and use the existing project's URL and service-role key. Keep `.env.seed` local and uncommitted.
+7. Run `npm run seed`.
+
+The seed is idempotent and verifies the database contains at least:
+
+- 2 courses
+- 4 assessment blocks
+- 28 learning units
+- 0 schedule tasks until the approved schedule phase
+
+You can verify the core rows in SQL Editor:
+
+```sql
+select 'courses' as item, count(*) from public.courses
+union all
+select 'assessment_blocks', count(*) from public.assessment_blocks
+union all
+select 'learning_units', count(*) from public.learning_units
+union all
+select 'study_tasks', count(*) from public.study_tasks;
+```
 
 ## GitHub Pages
 

@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { supabase } from '../../lib/supabase'
+import { getProfile } from '../../lib/data'
 import type { Profile } from '../../types/auth'
 
 interface AuthContextValue {
@@ -20,30 +21,6 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
-
-async function getProfile(userId: string): Promise<Profile> {
-  if (!supabase) {
-    throw new Error('Supabase environment variables are not configured.')
-  }
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, display_name, role, created_at')
-    .eq('id', userId)
-    .single()
-
-  if (error || !data) {
-    throw new Error(
-      'This account does not have a matching student or coach profile.',
-    )
-  }
-
-  if (data.role !== 'student' && data.role !== 'coach') {
-    throw new Error('This account has an unsupported profile role.')
-  }
-
-  return data as Profile
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)

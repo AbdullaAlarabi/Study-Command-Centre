@@ -28,3 +28,25 @@ Verification:
 - Development server startup: passed.
 
 Manual dependency: login cannot be exercised until the Phase 2 schema exists and the two Supabase Auth users have matching `profiles` rows.
+
+## Phase 2 — Supabase schema and seed architecture
+
+Status: locally complete on 21 July 2026; live Supabase application pending.
+
+Implemented locally:
+
+- Added a transactional replacement schema that permanently drops the 18 retired Fitness Desk tables and its trigger function.
+- Added the nine Study Command Centre tables, constraints, foreign keys, indexes, grants, and explicit no-RLS configuration.
+- Added deterministic core JSON for 2 courses, 4 assessment blocks, and 28 learning units; each assessment's weights total 100%.
+- Reserved four assessment content directories; academic content remains intentionally empty.
+- Added typed application data models and small query helpers.
+- Added a service-role-only, idempotent seed script with row-count verification.
+
+Verification:
+
+- Core seed audit: 2 courses, 4 assessments, 28 units, and 100% total weight per assessment.
+- `npm install`: passed; 195 packages audited with 0 vulnerabilities.
+- `npm run typecheck`: passed.
+- `npm run build`: passed with Vite 6.4.3.
+
+Pending live verification: the replacement SQL and seed must be run against the reused Supabase project after its service-role key is added locally.
