@@ -54,3 +54,25 @@ Verification:
 - Authentication verification: two email-confirmed Auth users exist; Khalid maps to `student` and Abdulla maps to `coach`. The frontend anon credentials can read both role rows.
 - GitHub `main` was force-replaced at commit `27e36dc`; the Pages build and deployment both passed.
 - Added a one-time service-worker and cache cleanup after the retired Fitness Desk PWA continued serving its offline shell from users' browsers.
+
+## Phase 3 — Design system and application shell
+
+Status: complete on 21 July 2026.
+
+Implemented:
+
+- Added the warm off-white, deep navy, teal, muted-gold, and restrained-risk visual tokens with reusable card shadows and accessible focus/reduced-motion behavior.
+- Added `AppHeader`, `DesktopSidebar`, `MobileBottomNav`, `PageContainer`, `StatCard`, `ProgressBar`, `ProgressRing`, `StatusBadge`, `AssessmentCard`, `TodayTaskCard`, `EmptyState`, `LoadingState`, `ErrorState`, and `ConfirmDialog`.
+- Replaced the temporary role shells with a responsive application shell and role-specific navigation.
+- Added every specified student and coach route, with explicit honest empty states where later phases own the data or feature.
+- Polished the login page around the message: “One task at a time. Finish it. Prove it. Move forward.”
+- Kept logout, role guards, redirects, and Supabase authentication behavior intact.
+
+Verification:
+
+- Authenticated visual QA passed for student and coach at 390 × 844 and 1440 × 1000.
+- Login visual QA passed at both widths.
+- All tested pages reported viewport width equal to document width; no horizontal overflow.
+- No fabricated academic scores, task completion, or activity were introduced.
+- `npm run typecheck`: passed.
+- `npm run build`: passed.

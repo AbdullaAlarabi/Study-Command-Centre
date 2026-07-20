@@ -1,15 +1,22 @@
-import { TemporaryRoleShell } from '../layouts/TemporaryRoleShell'
+import { BarChart3 } from 'lucide-react'
+import { EmptyState } from '../components/EmptyState'
+import { PageContainer } from '../components/PageContainer'
+import { useAuth } from '../features/auth/AuthProvider'
 
 export function CoachShellPage() {
+  const { profile } = useAuth()
+
   return (
-    <TemporaryRoleShell
-      eyebrow="Coach workspace"
-      title="The coach workspace is connected."
-      description="Authentication and role-based routing are working. Analytics, attempt review, essays, and activity monitoring will be built in their dedicated phase."
+    <PageContainer
+      eyebrow="Coach dashboard"
+      title={`Welcome back, ${profile?.display_name ?? 'Coach'}`}
+      description="Monitor completion, readiness, attempts, essays, and recent activity from one focused workspace."
     >
-      <div className="rounded-xl border border-gold/25 bg-amber-50 p-5 text-sm leading-6 text-navy">
-        Phase 1 shell: coach access confirmed.
-      </div>
-    </TemporaryRoleShell>
+      <EmptyState
+        title="Analytics begin in Phase 8"
+        description="The navigation and responsive shell are ready. No placeholder scores or invented student activity are shown here."
+        icon={BarChart3}
+      />
+    </PageContainer>
   )
 }
