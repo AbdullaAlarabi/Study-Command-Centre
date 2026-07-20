@@ -51,5 +51,5 @@ Verification:
 - Reused Supabase project: replacement schema applied successfully.
 - Permanent cleanup audit: all 18 retired Fitness Desk tables return `PGRST205` and are confirmed removed.
 - Live seed: verified 2 courses, 4 assessment blocks, 28 learning units, and 0 schedule tasks.
-- Authentication prerequisite audit: 0 Auth users and 0 profiles currently exist; the student and coach accounts remain a manual setup step.
+- Authentication verification: two email-confirmed Auth users exist; Khalid maps to `student` and Abdulla maps to `coach`. The frontend anon credentials can read both role rows.
 - GitHub `main` was force-replaced at commit `27e36dc`; the Pages build and deployment both passed.
