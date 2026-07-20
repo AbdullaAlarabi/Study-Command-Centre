@@ -51,6 +51,12 @@ test('unit completion follows chapter, revision, and mock rules', () => {
   assert.equal(isUnitComplete(units[0], attempts), true)
   assert.equal(isUnitComplete(units[3], attempts), false)
   assert.equal(isUnitComplete(units[3], attempts, new Set(['revision'])), true)
+  assert.equal(
+    isUnitComplete(units[3], [
+      attempt({ learning_unit_id: 'revision', status: 'passed', mcq_total: 0 }),
+    ]),
+    true,
+  )
   assert.equal(isUnitComplete(units[4], attempts), true)
 })
 

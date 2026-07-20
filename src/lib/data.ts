@@ -124,6 +124,18 @@ export async function getChapterQuizQuestions(learningUnitId: string) {
   return unwrap(data as Question[] | null, error)
 }
 
+export async function getRevisionPracticeQuestions(assessmentId: string) {
+  const { data, error } = await client()
+    .from('questions')
+    .select('*')
+    .eq('assessment_id', assessmentId)
+    .eq('question_scope', 'revision_practice')
+    .eq('question_type', 'mcq')
+    .eq('is_active', true)
+    .order('display_order')
+  return unwrap(data as Question[] | null, error)
+}
+
 export async function getAttempts(userId: string, learningUnitId?: string) {
   let query = client()
     .from('attempts')
@@ -263,6 +275,189 @@ export async function submitChapterQuizAttempt({
     attempt,
     activityWarning: activityError?.message,
   }
+}
+
+async function getNextAttemptNumber(userId: string, learningUnitId: string) {
+  const { data, error } = await client()
+    .from('attempts')
+    .select('attempt_number')
+    .eq('user_id', userId)
+    .eq('learning_unit_id', learningUnitId)
+    .order('attempt_number', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  return Number(data?.attempt_number ?? 0) + 1
+}
+
+export async function startRevisionPracticeAttempt({
+  userId,
+  assessmentId,
+  learningUnitId,
+  selectedQuestionIds,
+}: {
+  userId: string
+  assessmentId: string
+  learningUnitId: string
+  selectedQuestionIds: string[]
+}) {
+  const attemptNumber = await getNextAttemptNumber(userId, learningUnitId)
+  const { data, error } = await client()
+    .from('attempts')
+    .insert({
+      user_id: userId,
+      assessment_id: assessmentId,
+      learning_unit_id: learningUnitId,
+      attempt_number: attemptNumber,
+      status: 'in_progress',
+      started_at: new Date().toISOString(),
+      selected_question_ids: selectedQuestionIds,
+      answers_json: {},
+      mcq_correct: 0,
+      mcq_total: 10,
+      objective_percentage: 0,
+      essay_word_count: 0,
+      weak_topics_json: [],
+    })
+    .select('*')
+    .single()
+
+  const attempt = unwrap(data as Attempt | null, error)
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: userId,
+    action_type: 'revision_practice_started',
+    entity_type: 'attempt',
+    entity_id: attempt.id,
+    metadata_json: {
+      assessment_id: assessmentId,
+      learning_unit_id: learningUnitId,
+      attempt_number: attemptNumber,
+    },
+  })
+
+  return { attempt, activityWarning: activityError?.message }
+}
+
+export async function submitRevisionPracticeAttempt({
+  attemptId,
+  userId,
+  answers,
+  correct,
+  total,
+  percentage,
+  weakTopics,
+  durationSeconds,
+}: {
+  attemptId: string
+  userId: string
+  answers: Attempt['answers_json']
+  correct: number
+  total: number
+  percentage: number
+  weakTopics: string[]
+  durationSeconds: number
+}) {
+  const { data, error } = await client()
+    .from('attempts')
+    .update({
+      status: 'submitted',
+      submitted_at: new Date().toISOString(),
+      answers_json: answers,
+      mcq_correct: correct,
+      mcq_total: total,
+      objective_percentage: percentage,
+      weak_topics_json: weakTopics,
+      duration_seconds: durationSeconds,
+    })
+    .eq('id', attemptId)
+    .eq('user_id', userId)
+    .eq('status', 'in_progress')
+    .select('*')
+    .single()
+
+  const attempt = unwrap(data as Attempt | null, error)
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: userId,
+    action_type: 'revision_practice_submitted',
+    entity_type: 'attempt',
+    entity_id: attempt.id,
+    metadata_json: {
+      assessment_id: attempt.assessment_id,
+      learning_unit_id: attempt.learning_unit_id,
+      attempt_number: attempt.attempt_number,
+      mcq_correct: correct,
+      mcq_total: total,
+      objective_percentage: percentage,
+      weak_topics: weakTopics,
+    },
+  })
+
+  return { attempt, activityWarning: activityError?.message }
+}
+
+export async function completeRevisionUnit({
+  userId,
+  assessmentId,
+  learningUnitId,
+}: {
+  userId: string
+  assessmentId: string
+  learningUnitId: string
+}) {
+  const { data: existing, error: existingError } = await client()
+    .from('attempts')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('learning_unit_id', learningUnitId)
+    .eq('status', 'passed')
+    .eq('mcq_total', 0)
+    .order('attempt_number', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (existingError) throw new Error(existingError.message)
+  if (existing) return { attempt: existing as Attempt, activityWarning: undefined }
+
+  const attemptNumber = await getNextAttemptNumber(userId, learningUnitId)
+  const completedAt = new Date().toISOString()
+  const { data, error } = await client()
+    .from('attempts')
+    .insert({
+      user_id: userId,
+      assessment_id: assessmentId,
+      learning_unit_id: learningUnitId,
+      attempt_number: attemptNumber,
+      status: 'passed',
+      started_at: completedAt,
+      submitted_at: completedAt,
+      selected_question_ids: [],
+      answers_json: {},
+      mcq_correct: 0,
+      mcq_total: 0,
+      objective_percentage: 0,
+      essay_word_count: 0,
+      weak_topics_json: [],
+      duration_seconds: 0,
+    })
+    .select('*')
+    .single()
+
+  const attempt = unwrap(data as Attempt | null, error)
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: userId,
+    action_type: 'revision_completed',
+    entity_type: 'learning_unit',
+    entity_id: learningUnitId,
+    metadata_json: {
+      assessment_id: assessmentId,
+      learning_unit_id: learningUnitId,
+      attempt_id: attempt.id,
+      attempt_number: attemptNumber,
+    },
+  })
+
+  return { attempt, activityWarning: activityError?.message }
 }
 
 export async function getActivity(userId: string, limit = 50) {

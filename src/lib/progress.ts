@@ -49,6 +49,10 @@ export function isUnitComplete(
     )
   }
 
+  if (unit.unit_type === 'revision') {
+    return unitAttempts.some((attempt) => attempt.status === 'passed')
+  }
+
   return false
 }
 

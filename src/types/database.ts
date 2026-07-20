@@ -44,6 +44,15 @@ export interface StudyPackContent {
   commonConfusions?: string[]
   likelyEssayThemes?: string[]
   canYouExplain?: string[]
+  assessmentOverview?: string
+  chapterSummaries?: Array<{ title: string; summary: string; topic?: string }>
+  essentialDefinitions?: Array<{ term: string; definition: string }>
+  mustRememberLists?: Array<{ title: string; items: string[] }>
+  comparisonTables?: Array<{ title: string; rows: string[][] }>
+  likelyEssayQuestions?: string[]
+  answerPlans?: Array<{ question: string; points: string[] }>
+  commonMistakes?: string[]
+  weakTopicReminders?: Record<string, string>
   [key: string]: unknown
 }
 

@@ -138,3 +138,38 @@ Verification:
 - No tested page produced horizontal overflow.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
+
+## Phase 6 — Revision centre and weak-topic practice
+
+Status: complete on 21 July 2026.
+
+Implemented:
+
+- Replaced the revision placeholder with a four-assessment revision hub that follows the live sequential roadmap state.
+- Added concise revision-pack rendering for assessment overview, chapter summaries, essential definitions, must-remember lists, comparison tables, likely essay questions, answer plans, and common mistakes.
+- Added collapsible revision sections and persisted which available sections the student has opened on the current device.
+- Added personalized weak-topic frequency ranking across submitted chapter quizzes, mixed practice, and future mock attempts.
+- Added revision-content reminders for weak topics using direct reminders, essential definitions, chapter summaries, or must-remember lists when available.
+- Added mixed-practice selection of exactly 10 active revision MCQs, including all three chapters where their banks are populated and prioritizing frequently missed topics.
+- Added one-question-at-a-time mixed practice, free navigation, required answers, local answer backup, guarded submission, immediate grading, explanations, score review, and weak-topic updates.
+- Added persisted practice starts/submissions with selected question IDs, every answer, objective score, duration, attempt number, weak topics, and activity entries.
+- Added a dedicated Full Revision completion gate that requires every populated main section to have been opened and at least one mixed-practice set to have been submitted.
+- Stored revision completion as a separate passed attempt plus activity entry, preventing practice scores from unlocking Mock 1 prematurely.
+- Added non-mutating coach preview behavior for revision content and question-bank availability.
+
+Current honest data state:
+
+- Revision `content_json` fields and revision-practice question banks are not populated yet, so the live pages clearly report what is missing.
+- The four revision cards remain locked for the student until their three preceding chapter gates pass.
+- No fake content, questions, attempts, completions, or weak topics were inserted for visual QA.
+
+Verification:
+
+- `npm run test:revision`: 5/5 tests passed for weak-topic frequency, three-chapter selection, weak-topic prioritization, grading, and reminder lookup.
+- `npm run test:quiz`: 5/5 regression tests passed.
+- `npm run test:progress`: 7/7 regression tests passed, including attempt-backed revision completion.
+- Authenticated student revision hub and deep-link lock passed at 390 × 844.
+- Authenticated coach revision preview and honest content/practice empty states passed at 1440 × 1000.
+- No tested page produced horizontal overflow, and coach preview exposed no completion action.
+- `npm run typecheck`: passed.
+- `npm run build`: passed.

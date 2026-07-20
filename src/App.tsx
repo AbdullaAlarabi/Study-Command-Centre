@@ -4,7 +4,6 @@ import {
   ClipboardList,
   FileSearch,
   MessageSquareText,
-  NotebookTabs,
   Timer,
 } from 'lucide-react'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -20,6 +19,8 @@ import { ChapterStudyPage } from './pages/ChapterStudyPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PhasePlaceholderPage } from './pages/PhasePlaceholderPage'
+import { RevisionCentrePage } from './pages/RevisionCentrePage'
+import { RevisionPage } from './pages/RevisionPage'
 import { StudentRoadmapPage } from './pages/StudentRoadmapPage'
 import { StudentShellPage } from './pages/StudentShellPage'
 
@@ -55,17 +56,7 @@ export default function App() {
         <Route path="roadmap" element={<StudentRoadmapPage />} />
         <Route
           path="revision"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Revision centre"
-              title="Bring the chapters together"
-              description="Summaries, comparisons, essay plans, and weak-topic practice will live here."
-              emptyTitle="Revision content arrives in Phase 6"
-              emptyDescription="This navigation destination is ready without using fake practice data."
-              icon={NotebookTabs}
-              homeTo="/student"
-            />
-          }
+          element={<RevisionCentrePage />}
         />
         <Route
           path="results"
@@ -113,15 +104,7 @@ export default function App() {
           path="/student/revision/:unitId"
           element={
             <LearningUnitGate>
-              <PhasePlaceholderPage
-                eyebrow="Full revision"
-                title="Assessment revision pack"
-                description="This route will load the selected assessment's verified revision material."
-                emptyTitle="Revision pack not populated yet"
-                emptyDescription="It will unlock only after all three chapter quizzes pass."
-                icon={NotebookTabs}
-                homeTo="/student"
-              />
+              <RevisionPage />
             </LearningUnitGate>
           }
         />

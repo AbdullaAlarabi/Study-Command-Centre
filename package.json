@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "seed": "tsx --env-file=.env.seed scripts/seed.ts",
     "test:progress": "tsx --test scripts/progress.test.ts",
-    "test:quiz": "tsx --test scripts/quiz.test.ts"
+    "test:quiz": "tsx --test scripts/quiz.test.ts",
+    "test:revision": "tsx --test scripts/revision.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.52.1",
