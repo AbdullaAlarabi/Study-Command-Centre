@@ -1,10 +1,8 @@
 import {
   Activity,
   BarChart3,
-  BookOpenText,
   ClipboardList,
   FileSearch,
-  ListChecks,
   MessageSquareText,
   NotebookTabs,
   Timer,
@@ -17,6 +15,8 @@ import { LearningUnitGate } from './features/student/LearningUnitGate'
 import { AppShell } from './layouts/AppShell'
 import { RoleAwareAppShell } from './layouts/RoleAwareAppShell'
 import { CoachShellPage } from './pages/CoachShellPage'
+import { ChapterQuizPage } from './pages/ChapterQuizPage'
+import { ChapterStudyPage } from './pages/ChapterStudyPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PhasePlaceholderPage } from './pages/PhasePlaceholderPage'
@@ -97,15 +97,7 @@ export default function App() {
           path="/student/chapter/:unitId"
           element={
             <LearningUnitGate>
-              <PhasePlaceholderPage
-                eyebrow="Chapter study pack"
-                title="Focused chapter notes"
-                description="Concise source-grounded notes will sit here before the chapter quiz gate."
-                emptyTitle="Study-pack content is pending"
-                emptyDescription="The chapter experience is implemented in Phase 5 and populated only from university files."
-                icon={BookOpenText}
-                homeTo="/student"
-              />
+              <ChapterStudyPage />
             </LearningUnitGate>
           }
         />
@@ -113,15 +105,7 @@ export default function App() {
           path="/student/quiz/:unitId"
           element={
             <LearningUnitGate>
-              <PhasePlaceholderPage
-                eyebrow="Chapter quiz"
-                title="Prove the chapter"
-                description="Five objective questions and one essay will control chapter completion."
-                emptyTitle="Quiz engine arrives in Phase 5"
-                emptyDescription="No sample score or question is shown until the verified quiz bank and attempt flow are connected."
-                icon={ListChecks}
-                homeTo="/student"
-              />
+              <ChapterQuizPage />
             </LearningUnitGate>
           }
         />

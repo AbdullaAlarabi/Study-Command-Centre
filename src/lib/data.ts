@@ -112,6 +112,18 @@ export async function getQuestions(filters: QuestionFilters) {
   return unwrap(data as Question[] | null, error)
 }
 
+export async function getChapterQuizQuestions(learningUnitId: string) {
+  const { data, error } = await client()
+    .from('questions')
+    .select('*')
+    .eq('learning_unit_id', learningUnitId)
+    .eq('question_scope', 'chapter_quiz')
+    .eq('is_active', true)
+    .in('question_type', ['mcq', 'essay'])
+    .order('display_order')
+  return unwrap(data as Question[] | null, error)
+}
+
 export async function getAttempts(userId: string, learningUnitId?: string) {
   let query = client()
     .from('attempts')
@@ -121,6 +133,136 @@ export async function getAttempts(userId: string, learningUnitId?: string) {
   if (learningUnitId) query = query.eq('learning_unit_id', learningUnitId)
   const { data, error } = await query
   return unwrap(data as Attempt[] | null, error)
+}
+
+export async function startChapterQuizAttempt({
+  userId,
+  assessmentId,
+  learningUnitId,
+  selectedQuestionIds,
+}: {
+  userId: string
+  assessmentId: string
+  learningUnitId: string
+  selectedQuestionIds: string[]
+}) {
+  const { data: previous, error: previousError } = await client()
+    .from('attempts')
+    .select('attempt_number')
+    .eq('user_id', userId)
+    .eq('learning_unit_id', learningUnitId)
+    .order('attempt_number', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (previousError) throw new Error(previousError.message)
+  const attemptNumber = Number(previous?.attempt_number ?? 0) + 1
+
+  const { data, error } = await client()
+    .from('attempts')
+    .insert({
+      user_id: userId,
+      assessment_id: assessmentId,
+      learning_unit_id: learningUnitId,
+      attempt_number: attemptNumber,
+      status: 'in_progress',
+      started_at: new Date().toISOString(),
+      selected_question_ids: selectedQuestionIds,
+      answers_json: {},
+      mcq_correct: 0,
+      mcq_total: 5,
+      objective_percentage: 0,
+      essay_word_count: 0,
+      weak_topics_json: [],
+    })
+    .select('*')
+    .single()
+
+  const attempt = unwrap(data as Attempt | null, error)
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: userId,
+    action_type: 'quiz_started',
+    entity_type: 'attempt',
+    entity_id: attempt.id,
+    metadata_json: {
+      assessment_id: assessmentId,
+      learning_unit_id: learningUnitId,
+      attempt_number: attemptNumber,
+    },
+  })
+
+  return {
+    attempt,
+    activityWarning: activityError?.message,
+  }
+}
+
+export async function submitChapterQuizAttempt({
+  attemptId,
+  userId,
+  answers,
+  status,
+  mcqCorrect,
+  mcqTotal,
+  objectivePercentage,
+  essayWordCount,
+  weakTopics,
+  durationSeconds,
+}: {
+  attemptId: string
+  userId: string
+  answers: Attempt['answers_json']
+  status: 'passed' | 'failed'
+  mcqCorrect: number
+  mcqTotal: number
+  objectivePercentage: number
+  essayWordCount: number
+  weakTopics: string[]
+  durationSeconds: number
+}) {
+  const submittedAt = new Date().toISOString()
+  const { data, error } = await client()
+    .from('attempts')
+    .update({
+      status,
+      submitted_at: submittedAt,
+      answers_json: answers,
+      mcq_correct: mcqCorrect,
+      mcq_total: mcqTotal,
+      objective_percentage: objectivePercentage,
+      essay_word_count: essayWordCount,
+      weak_topics_json: weakTopics,
+      duration_seconds: durationSeconds,
+    })
+    .eq('id', attemptId)
+    .eq('user_id', userId)
+    .eq('status', 'in_progress')
+    .select('*')
+    .single()
+
+  const attempt = unwrap(data as Attempt | null, error)
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: userId,
+    action_type: 'quiz_submitted',
+    entity_type: 'attempt',
+    entity_id: attempt.id,
+    metadata_json: {
+      assessment_id: attempt.assessment_id,
+      learning_unit_id: attempt.learning_unit_id,
+      attempt_number: attempt.attempt_number,
+      status,
+      mcq_correct: mcqCorrect,
+      mcq_total: mcqTotal,
+      objective_percentage: objectivePercentage,
+      essay_word_count: essayWordCount,
+      weak_topics: weakTopics,
+    },
+  })
+
+  return {
+    attempt,
+    activityWarning: activityError?.message,
+  }
 }
 
 export async function getActivity(userId: string, limit = 50) {

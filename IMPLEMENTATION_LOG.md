@@ -108,3 +108,33 @@ Verification:
 - No tested page produced horizontal overflow.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
+
+## Phase 5 — Chapter study packs and quiz gate
+
+Status: complete on 21 July 2026.
+
+Implemented:
+
+- Added live chapter study pages driven only by the populated sections in `learning_units.content_json`: overview, definitions, main ideas, processes/models, comparisons, common confusions, likely essay themes, and explain-it-yourself prompts.
+- Added an honest study-pack empty state and sticky chapter-quiz action without inventing academic content.
+- Added active chapter-question loading and randomized selection of exactly five MCQs and one essay, with immediate-selection repetition avoided whenever alternatives exist.
+- Added persisted in-progress attempts, attempt numbering, selected question IDs, start/submit activity logs, and guarded single submission.
+- Added one-question-at-a-time navigation with free numbered navigation, required MCQs, a live essay word count, and the 60-word minimum.
+- Added objective grading with the chapter pass gate of at least 4/5 MCQs plus a submitted 60-word essay. Essays are stored for coach review and are never auto-graded.
+- Added result review for every MCQ, correct answers, explanations, weak-topic extraction, essay submission status, retry, and next-unlocked-unit routing.
+- Added automatic device-local answer backup, refresh recovery tied to the matching Supabase attempt, and backup removal only after a successful submission.
+- Added coach-only, non-mutating quiz preview behavior so coach navigation cannot create attempts or alter student progress.
+
+Current honest data state:
+
+- Chapter `content_json` fields and chapter question banks are not populated yet, so the live pages clearly report what is missing.
+- No fake questions, answers, scores, or attempts were inserted for visual QA.
+
+Verification:
+
+- `npm run test:quiz`: 5/5 tests passed for selection size, non-repetition, essay word count, pass rules, and weak-topic extraction.
+- `npm run test:progress`: 7/7 regression tests passed.
+- Authenticated student study/quiz routes passed at 390 × 844; authenticated coach preview routes passed at 1440 × 1000.
+- No tested page produced horizontal overflow.
+- `npm run typecheck`: passed.
+- `npm run build`: passed.
