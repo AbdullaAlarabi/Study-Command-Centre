@@ -5,19 +5,22 @@ import {
   ClipboardList,
   FileSearch,
   ListChecks,
-  Map,
   MessageSquareText,
   NotebookTabs,
   Timer,
 } from 'lucide-react'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { RequireAuth } from './features/auth/RequireAuth'
 import { RequireRole } from './features/auth/RequireRole'
 import { useAuth } from './features/auth/AuthProvider'
+import { LearningUnitGate } from './features/student/LearningUnitGate'
 import { AppShell } from './layouts/AppShell'
+import { RoleAwareAppShell } from './layouts/RoleAwareAppShell'
 import { CoachShellPage } from './pages/CoachShellPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PhasePlaceholderPage } from './pages/PhasePlaceholderPage'
+import { StudentRoadmapPage } from './pages/StudentRoadmapPage'
 import { StudentShellPage } from './pages/StudentShellPage'
 
 function HomeRoute() {
@@ -49,62 +52,7 @@ export default function App() {
         }
       >
         <Route index element={<StudentShellPage />} />
-        <Route
-          path="roadmap"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Assessment roadmap"
-              title="Your route to each exam"
-              description="Chapters, revision, and three mocks will unlock in a strict sequence."
-              emptyTitle="Roadmap arrives in Phase 4"
-              emptyDescription="The shell is ready, but live unit progress and lock states have not been added yet."
-              icon={Map}
-              homeTo="/student"
-            />
-          }
-        />
-        <Route
-          path="assessment/:assessmentId"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Assessment"
-              title="Assessment overview"
-              description="This route is ready for its seven-unit learning path."
-              emptyTitle="Assessment details are not loaded yet"
-              emptyDescription="Phase 4 will connect this view to the selected assessment and its sequential unlock state."
-              icon={BookOpenText}
-              homeTo="/student"
-            />
-          }
-        />
-        <Route
-          path="chapter/:unitId"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Chapter study pack"
-              title="Focused chapter notes"
-              description="Concise source-grounded notes will sit here before the chapter quiz gate."
-              emptyTitle="Study-pack content is pending"
-              emptyDescription="The chapter experience is implemented in Phase 5 and populated only from university files."
-              icon={BookOpenText}
-              homeTo="/student"
-            />
-          }
-        />
-        <Route
-          path="quiz/:unitId"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Chapter quiz"
-              title="Prove the chapter"
-              description="Five objective questions and one essay will control chapter completion."
-              emptyTitle="Quiz engine arrives in Phase 5"
-              emptyDescription="No sample score or question is shown until the verified quiz bank and attempt flow are connected."
-              icon={ListChecks}
-              homeTo="/student"
-            />
-          }
-        />
+        <Route path="roadmap" element={<StudentRoadmapPage />} />
         <Route
           path="revision"
           element={
@@ -115,34 +63,6 @@ export default function App() {
               emptyTitle="Revision content arrives in Phase 6"
               emptyDescription="This navigation destination is ready without using fake practice data."
               icon={NotebookTabs}
-              homeTo="/student"
-            />
-          }
-        />
-        <Route
-          path="revision/:unitId"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Full revision"
-              title="Assessment revision pack"
-              description="This route will load the selected assessment's verified revision material."
-              emptyTitle="Revision pack not populated yet"
-              emptyDescription="It will unlock only after all three chapter quizzes pass."
-              icon={NotebookTabs}
-              homeTo="/student"
-            />
-          }
-        />
-        <Route
-          path="mock/:unitId"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Mock exam"
-              title="Exam rehearsal"
-              description="Diagnostic, timed, and final-rehearsal modes will use the configured assessment format."
-              emptyTitle="Mock engine arrives in Phase 7"
-              emptyDescription="Timer, answer backup, grading, and sequential unlock behavior are not simulated in this shell phase."
-              icon={Timer}
               homeTo="/student"
             />
           }
@@ -159,6 +79,82 @@ export default function App() {
               icon={BarChart3}
               homeTo="/student"
             />
+          }
+        />
+      </Route>
+      <Route
+        element={
+          <RequireAuth>
+            <RoleAwareAppShell />
+          </RequireAuth>
+        }
+      >
+        <Route
+          path="/student/assessment/:assessmentId"
+          element={<StudentRoadmapPage />}
+        />
+        <Route
+          path="/student/chapter/:unitId"
+          element={
+            <LearningUnitGate>
+              <PhasePlaceholderPage
+                eyebrow="Chapter study pack"
+                title="Focused chapter notes"
+                description="Concise source-grounded notes will sit here before the chapter quiz gate."
+                emptyTitle="Study-pack content is pending"
+                emptyDescription="The chapter experience is implemented in Phase 5 and populated only from university files."
+                icon={BookOpenText}
+                homeTo="/student"
+              />
+            </LearningUnitGate>
+          }
+        />
+        <Route
+          path="/student/quiz/:unitId"
+          element={
+            <LearningUnitGate>
+              <PhasePlaceholderPage
+                eyebrow="Chapter quiz"
+                title="Prove the chapter"
+                description="Five objective questions and one essay will control chapter completion."
+                emptyTitle="Quiz engine arrives in Phase 5"
+                emptyDescription="No sample score or question is shown until the verified quiz bank and attempt flow are connected."
+                icon={ListChecks}
+                homeTo="/student"
+              />
+            </LearningUnitGate>
+          }
+        />
+        <Route
+          path="/student/revision/:unitId"
+          element={
+            <LearningUnitGate>
+              <PhasePlaceholderPage
+                eyebrow="Full revision"
+                title="Assessment revision pack"
+                description="This route will load the selected assessment's verified revision material."
+                emptyTitle="Revision pack not populated yet"
+                emptyDescription="It will unlock only after all three chapter quizzes pass."
+                icon={NotebookTabs}
+                homeTo="/student"
+              />
+            </LearningUnitGate>
+          }
+        />
+        <Route
+          path="/student/mock/:unitId"
+          element={
+            <LearningUnitGate>
+              <PhasePlaceholderPage
+                eyebrow="Mock exam"
+                title="Exam rehearsal"
+                description="Diagnostic, timed, and final-rehearsal modes will use the configured assessment format."
+                emptyTitle="Mock engine arrives in Phase 7"
+                emptyDescription="Timer, answer backup, grading, and sequential unlock behavior are not simulated in this shell phase."
+                icon={Timer}
+                homeTo="/student"
+              />
+            </LearningUnitGate>
           }
         />
       </Route>

@@ -3,18 +3,28 @@ import { Link } from 'react-router-dom'
 import { StatusBadge } from './StatusBadge'
 
 export function TodayTaskCard({
+  courseCode,
   title,
   description,
   meta,
+  dueLabel,
   actionLabel = 'Open task',
   to,
+  onAction,
+  actionPending = false,
+  completed = false,
   placeholder = false,
 }: {
+  courseCode?: string
   title: string
   description: string
   meta?: string
+  dueLabel?: string
   actionLabel?: string
   to?: string
+  onAction?: () => void
+  actionPending?: boolean
+  completed?: boolean
   placeholder?: boolean
 }) {
   return (
@@ -24,9 +34,16 @@ export function TodayTaskCard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-sm font-semibold text-white/75">
             <CalendarCheck2 aria-hidden="true" size={18} />
-            Today’s task
+            {courseCode ? `Today’s task · ${courseCode}` : 'Today’s task'}
           </p>
-          {placeholder && <StatusBadge status="pending" label="Preview only" />}
+          {placeholder ? (
+            <StatusBadge status="pending" label="Preview only" />
+          ) : dueLabel ? (
+            <StatusBadge
+              status={completed ? 'complete' : 'pending'}
+              label={dueLabel}
+            />
+          ) : null}
         </div>
         <h2 className="mt-5 max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl">
           {title}
@@ -41,6 +58,17 @@ export function TodayTaskCard({
             {actionLabel}
             <ArrowRight aria-hidden="true" size={18} />
           </Link>
+        )}
+        {!to && onAction && (
+          <button
+            className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-white px-5 font-bold text-navy transition hover:bg-gold-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
+            type="button"
+            disabled={actionPending || completed}
+            onClick={onAction}
+          >
+            {actionPending ? 'Saving…' : completed ? 'Completed' : actionLabel}
+            {!completed && <ArrowRight aria-hidden="true" size={18} />}
+          </button>
         )}
       </div>
     </article>

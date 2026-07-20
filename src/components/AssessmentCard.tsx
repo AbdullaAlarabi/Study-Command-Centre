@@ -9,7 +9,9 @@ export function AssessmentCard({
   examDate,
   progress,
   readiness,
+  completedUnits,
   status = 'pending',
+  statusLabel,
   to,
 }: {
   courseCode: string
@@ -17,7 +19,9 @@ export function AssessmentCard({
   examDate: string
   progress?: number
   readiness?: number
+  completedUnits?: { completed: number; total: number }
   status?: StatusTone
+  statusLabel?: string
   to: string
 }) {
   return (
@@ -29,12 +33,17 @@ export function AssessmentCard({
           </p>
           <h3 className="mt-1 text-lg font-bold text-navy">{title}</h3>
         </div>
-        <StatusBadge status={status} />
+        <StatusBadge status={status} label={statusLabel} />
       </div>
       <p className="mt-3 flex items-center gap-2 text-sm text-muted">
         <CalendarDays aria-hidden="true" size={16} />
         {examDate}
       </p>
+      {completedUnits && (
+        <p className="mt-2 text-sm font-medium text-navy">
+          {completedUnits.completed} of {completedUnits.total} units complete
+        </p>
+      )}
       <div className="mt-5 space-y-4">
         <ProgressBar value={progress} label="Completion" />
         <ProgressBar value={readiness} label="Readiness" tone="gold" />

@@ -62,6 +62,16 @@ export async function getLearningUnits(assessmentId: string) {
   return unwrap(data as LearningUnit[] | null, error)
 }
 
+export async function getAllLearningUnits() {
+  const { data, error } = await client()
+    .from('learning_units')
+    .select('*')
+    .eq('is_active', true)
+    .order('assessment_id')
+    .order('unlock_order')
+  return unwrap(data as LearningUnit[] | null, error)
+}
+
 export async function getStudyTasks(fromDate?: string, throughDate?: string) {
   let query = client()
     .from('study_tasks')
@@ -121,4 +131,38 @@ export async function getActivity(userId: string, limit = 50) {
     .order('created_at', { ascending: false })
     .limit(limit)
   return unwrap(data as ActivityLog[] | null, error)
+}
+
+export async function completeManualStudyTask(userId: string, task: StudyTask) {
+  const existing = await client()
+    .from('activity_log')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('action_type', 'manual_task_completed')
+    .eq('entity_type', 'study_task')
+    .eq('entity_id', task.id)
+    .limit(1)
+    .maybeSingle()
+
+  if (existing.error) throw new Error(existing.error.message)
+  if (existing.data) return existing.data as ActivityLog
+
+  const { data, error } = await client()
+    .from('activity_log')
+    .insert({
+      user_id: userId,
+      action_type: 'manual_task_completed',
+      entity_type: 'study_task',
+      entity_id: task.id,
+      metadata_json: {
+        assessment_id: task.assessment_id,
+        learning_unit_id: task.learning_unit_id,
+        task_date: task.task_date,
+        task_type: task.task_type,
+      },
+    })
+    .select('*')
+    .single()
+
+  return unwrap(data as ActivityLog | null, error)
 }

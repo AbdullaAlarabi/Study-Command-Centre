@@ -76,3 +76,35 @@ Verification:
 - No fabricated academic scores, task completion, or activity were introduced.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
+
+## Phase 4 — Student dashboard and roadmap
+
+Status: complete on 21 July 2026.
+
+Implemented:
+
+- Connected the student dashboard to live Supabase courses, assessments, learning units, study tasks, attempts, and activity.
+- Added the live Today’s Task state, type-aware task routing, and idempotent manual task completion recorded in `activity_log`.
+- Added next-exam countdown and weighted assessment progress.
+- Added distinct plan-completion and readiness metrics without treating missing data as a zero score.
+- Added four live assessment cards with completed units, weighted progress, readiness, dates, and risk status.
+- Added the next-five-tasks list and recent weak-topic preview.
+- Added four responsive seven-step assessment roadmaps with completed, current, up-next/locked, and locked states.
+- Enforced direct-route unit locks for students and verified coach lock bypass.
+- Added pure progress utilities for unit completion, weighted completion, readiness, overdue tasks, risk state, next unit, roadmap state, and date/percentage calculations.
+
+Current honest data state:
+
+- The Phase 9 schedule is not seeded yet, so Today’s Task and upcoming tasks show live empty states.
+- No quiz/mock attempts exist yet, so readiness is shown as unavailable rather than as a fabricated 0%.
+- Each assessment correctly exposes its first chapter and locks later units.
+
+Verification:
+
+- `npm run test:progress`: 7/7 tests passed.
+- Authenticated student dashboard and roadmap QA passed at 390 × 844 and 1440 × 1000.
+- Four assessments, four current-unit labels, and four up-next labels verified at both widths.
+- Locked student deep-link, unlocked student deep-link, and coach bypass behaviors passed.
+- No tested page produced horizontal overflow.
+- `npm run typecheck`: passed.
+- `npm run build`: passed.
