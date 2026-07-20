@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import WebSocket from 'ws'
 import coreSeed from '../src/data/core-seed.json'
 import type { CoreSeed } from '../src/types/database'
 
@@ -18,6 +19,7 @@ if (process.env.VITE_SUPABASE_SERVICE_ROLE_KEY) {
 const seed = coreSeed as CoreSeed
 const admin = createClient(supabaseUrl, serviceRoleKey, {
   auth: { persistSession: false, autoRefreshToken: false },
+  realtime: { transport: WebSocket },
 })
 
 async function upsertRows(

@@ -31,7 +31,7 @@ Manual dependency: login cannot be exercised until the Phase 2 schema exists and
 
 ## Phase 2 — Supabase schema and seed architecture
 
-Status: locally complete on 21 July 2026; live Supabase application pending.
+Status: complete on 21 July 2026.
 
 Implemented locally:
 
@@ -48,5 +48,8 @@ Verification:
 - `npm install`: passed; 195 packages audited with 0 vulnerabilities.
 - `npm run typecheck`: passed.
 - `npm run build`: passed with Vite 6.4.3.
-
-Pending live verification: the replacement SQL and seed must be run against the reused Supabase project after its service-role key is added locally.
+- Reused Supabase project: replacement schema applied successfully.
+- Permanent cleanup audit: all 18 retired Fitness Desk tables return `PGRST205` and are confirmed removed.
+- Live seed: verified 2 courses, 4 assessment blocks, 28 learning units, and 0 schedule tasks.
+- Authentication prerequisite audit: 0 Auth users and 0 profiles currently exist; the student and coach accounts remain a manual setup step.
+- GitHub `main` was force-replaced at commit `27e36dc`; the Pages build and deployment both passed.
