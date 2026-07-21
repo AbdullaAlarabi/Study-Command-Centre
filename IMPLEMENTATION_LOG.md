@@ -261,3 +261,9 @@ Status: complete on 21 July 2026.
 
 - Renamed the GitHub repository from `Fitness-Desk` to `Study-Command-Centre`.
 - Updated the local Git remote and GitHub Pages URL to the Study Command Centre name.
+
+## Safari and saved-site icons
+
+- Converted the existing checked-book brand mark into SVG and raster application icons.
+- Added Safari tab, pinned-tab, Apple touch, Home Screen, maskable, and web-manifest icon metadata.
+- Added opaque Apple/manifest artwork so iOS and macOS apply their native icon masks without unwanted corner colors.
