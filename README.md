@@ -86,7 +86,7 @@ If a custom domain is later configured, preserve its `CNAME` file under `public/
 - Open at least one student hash route and one coach hash route after refresh to confirm routing and authentication recovery.
 - Preserve `public/CNAME` if a custom domain is added later.
 
-Current repository Pages URL: `https://abdullaalarabi.github.io/Fitness-Desk/`.
+Current repository Pages URL: `https://abdullaalarabi.github.io/Study-Command-Centre/`.
 
 ## Security boundary
 

@@ -256,3 +256,8 @@ Status: complete on 21 July 2026.
 - Verified failed/passed chapter gates, revision/mixed practice, fixed mock concealment/review, timed auto-submit, quiz/mock refresh recovery, coach keys/marking, analytics, filters, manual unlock, and guarded reset.
 - Final QA cleanup removed all eight temporary attempts, linked reviews/activity, and both temporary coach actions.
 - Repository and production-bundle scans found no service-role credential; real environment files remain ignored.
+
+## Project rename
+
+- Renamed the GitHub repository from `Fitness-Desk` to `Study-Command-Centre`.
+- Updated the local Git remote and GitHub Pages URL to the Study Command Centre name.
