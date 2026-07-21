@@ -48,10 +48,28 @@ async function verifyCount(table: string, expected: number) {
   console.log(`${table}: verified ${count ?? 0} rows`)
 }
 
+async function learningUnitsWithPreservedContent() {
+  const ids = seed.learningUnits.map((unit) => unit.id)
+  const { data, error } = await admin
+    .from('learning_units')
+    .select('id, content_json')
+    .in('id', ids)
+
+  if (error) throw new Error(`learning_units content preservation: ${error.message}`)
+  const existingContent = new Map(
+    (data ?? []).map((row) => [row.id as string, row.content_json]),
+  )
+
+  return seed.learningUnits.map((unit) => ({
+    ...unit,
+    content_json: existingContent.get(unit.id) ?? unit.content_json,
+  }))
+}
+
 async function run() {
   await upsertRows('courses', seed.courses)
   await upsertRows('assessment_blocks', seed.assessmentBlocks)
-  await upsertRows('learning_units', seed.learningUnits)
+  await upsertRows('learning_units', await learningUnitsWithPreservedContent())
   await upsertRows('study_tasks', seed.studyTasks)
 
   await verifyCount('courses', seed.courses.length)

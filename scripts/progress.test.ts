@@ -117,6 +117,14 @@ test('next unit and roadmap states remain sequential', () => {
   assert.equal(states.get('revision'), 'locked')
 })
 
+test('a coach override unlocks only the selected unit without completing prerequisites', () => {
+  const states = getRoadmapUnitStatuses(units, [], new Set(), new Set(['chapter-3']))
+  assert.equal(states.get('chapter-1'), 'current')
+  assert.equal(states.get('chapter-2'), 'upcoming')
+  assert.equal(states.get('chapter-3'), 'current')
+  assert.equal(states.get('revision'), 'locked')
+})
+
 test('percentage returns undefined instead of inventing a zero denominator score', () => {
   assert.equal(calculatePercentage(0, 0), undefined)
   assert.equal(calculatePercentage(3, 4), 75)

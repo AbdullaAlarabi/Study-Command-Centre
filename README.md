@@ -33,12 +33,12 @@ This project intentionally reuses the retired Fitness Desk Supabase project. The
 6. Copy `.env.seed.example` to `.env.seed` and use the existing project's URL and service-role key. Keep `.env.seed` local and uncommitted.
 7. Run `npm run seed`.
 
-The seed is idempotent and verifies the database contains at least:
+The seed is idempotent, preserves imported academic `content_json`, and verifies the database contains:
 
 - 2 courses
 - 4 assessment blocks
 - 28 learning units
-- 0 schedule tasks until the approved schedule phase
+- 44 approved schedule tasks from 21 July through 2 September 2026
 
 ## Approved academic content
 
@@ -48,7 +48,7 @@ The seed is idempotent and verifies the database contains at least:
 2. Import it with the local service role: `npm run content:import`
 3. Safely rerun the import whenever supplied files are corrected; unchanged records are skipped and stable IDs update in place.
 4. Run all regression and integration tests: `npm test`
-5. Run authenticated production-build QA with installed Google Chrome: `npm run qa:phase7`
+5. Run authenticated production-build QA with installed Google Chrome: `npm run qa:final`
 
 The Phase 7 import populates 28 existing learning units and 282 question records: 144 chapter-bank MCQs, 48 chapter-bank essays, 60 fixed-mock MCQs, and 30 fixed-mock essays. It does not create a parallel content schema.
 
@@ -74,6 +74,19 @@ The app uses `HashRouter`, and Vite emits relative asset URLs. This supports bot
 4. Run the **Deploy to GitHub Pages** workflow or push to `main`.
 
 If a custom domain is later configured, preserve its `CNAME` file under `public/`.
+
+## Final deployment checklist
+
+- Run `npm run content:audit`; all approved totals must pass with zero errors.
+- Run `npm test`, `npm run typecheck`, and `npm run build`.
+- Run `npm run qa:final`; it creates short-lived authenticated QA data and removes it afterward.
+- Confirm `.env.local` and `.env.seed` remain ignored and no service-role key appears in `dist/`.
+- Confirm the repository Actions secrets `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are present.
+- Push `main`, wait for the Pages workflow’s build and deploy jobs to pass, then hard-refresh the live URL.
+- Open at least one student hash route and one coach hash route after refresh to confirm routing and authentication recovery.
+- Preserve `public/CNAME` if a custom domain is added later.
+
+Current repository Pages URL: `https://abdullaalarabi.github.io/Fitness-Desk/`.
 
 ## Security boundary
 

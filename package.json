@@ -13,10 +13,13 @@
     "test:quiz": "tsx --test scripts/quiz.test.ts",
     "test:revision": "tsx --test scripts/revision.test.ts",
     "test:content": "tsx --test scripts/content-integration.test.ts",
-    "test": "npm run test:progress && npm run test:quiz && npm run test:revision && npm run test:content",
+    "test:analytics": "tsx --test scripts/analytics.test.ts",
+    "test:schedule": "tsx --test scripts/schedule.test.ts",
+    "test": "npm run test:progress && npm run test:quiz && npm run test:revision && npm run test:content && npm run test:analytics && npm run test:schedule",
     "content:audit": "tsx scripts/content-audit.ts",
     "content:import": "tsx --env-file=.env.seed scripts/import-academic-content.ts",
-    "qa:phase7": "tsx --env-file=.env.seed scripts/phase7-browser-qa.ts"
+    "qa:phase7": "tsx --env-file=.env.seed scripts/phase7-browser-qa.ts",
+    "qa:final": "tsx --env-file=.env.seed scripts/phase7-browser-qa.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.52.1",

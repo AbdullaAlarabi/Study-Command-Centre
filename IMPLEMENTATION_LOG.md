@@ -206,3 +206,53 @@ Verification:
 - Coach numeric marking, optional feedback, total-score update, and analytics passed.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
+
+## Phase 8 — Coach dashboard and analytics
+
+Status: complete on 21 July 2026.
+
+Implemented:
+
+- Added overall completion/readiness, risk, inactivity, overdue-task, submitted-attempt, and pending-essay metrics.
+- Added four assessment progress/readiness panels, a Recharts chapter-score trend, and a fixed-mock comparison chart.
+- Added normalized weak-topic ranking, recent attempts, and chronological activity.
+- Added attempt filters for course, assessment, unit type, result/essay status, and date range, with honest filtered empty states.
+- Preserved full supplied answer/model/marking detail and numeric coach marking.
+- Added guarded latest-attempt reset and idempotent next-unit unlock actions recorded in the existing activity log; no parallel schema or permission layer was introduced.
+- Added student roadmap support for coach unlocks without falsely completing prerequisites.
+
+Verification:
+
+- Analytics and coach-override regression tests passed.
+- Authenticated coach dashboard, marking, filtering, unlock, reset, activity, and responsive chart QA passed.
+- A mobile multi-result chart overflow found during acceptance QA was fixed and the full run then passed.
+
+## Phase 9 — Approved schedule and finalized progress logic
+
+Status: complete on 21 July 2026.
+
+Implemented:
+
+- Added all 44 exact approved daily task labels from 21 July through 2 September 2026 to the deterministic core seed.
+- Mapped chapter, revision, and fixed-mock tasks to existing stable course, assessment, and unit IDs; retained Mock 3 as the undated next roadmap action after Mock 2.
+- Kept each assessment at the approved 15% + 15% + 15% chapters, 10% revision, and 15% + 15% + 15% mocks.
+- Finalized overall completion as the equal average of four assessment blocks, readiness from latest eligible evidence, due/total plan completion, and master-spec risk precedence.
+- Hardened the core seed so schedule reruns preserve all imported Phase 7 academic content.
+
+Verified live data:
+
+- 2 courses, 4 assessment blocks, 28 populated learning units, and exactly 44 study tasks.
+- Schedule integrity, relationship, roadmap-weight, and undated-Mock-3 tests passed.
+
+## Final integration and acceptance QA
+
+Status: complete on 21 July 2026.
+
+- `npm run content:audit`: passed; 2 maps, 12 packs, 12 banks, 144 chapter MCQs, 48 chapter essays, 4 revision packs, 12 mocks, and 12 keys; zero errors.
+- `npm test`: 38/38 tests passed across progress, quiz, revision, content integration, analytics, and schedule suites.
+- `npm run typecheck`: passed.
+- `npm run build`: passed.
+- Authenticated browser QA: 28 checks and 42 screenshots passed at 390×844, 768×1024, and 1440×1000 with no horizontal overflow.
+- Verified failed/passed chapter gates, revision/mixed practice, fixed mock concealment/review, timed auto-submit, quiz/mock refresh recovery, coach keys/marking, analytics, filters, manual unlock, and guarded reset.
+- Final QA cleanup removed all eight temporary attempts, linked reviews/activity, and both temporary coach actions.
+- Repository and production-bundle scans found no service-role credential; real environment files remain ignored.

@@ -114,6 +114,7 @@ export function StudentRoadmapPage() {
             units,
             overview.attempts,
             overview.manuallyCompletedUnitIds,
+            overview.manuallyUnlockedUnitIds,
           )
           const completion = calculateWeightedAssessmentCompletion(
             units,
@@ -189,7 +190,9 @@ export function StudentRoadmapPage() {
                                   : 'locked'
                           }
                           label={
-                            profile?.role === 'coach' &&
+                            overview.manuallyUnlockedUnitIds.has(unit.id) && status !== 'completed'
+                              ? 'Coach unlocked'
+                              : profile?.role === 'coach' &&
                             (status === 'locked' || status === 'upcoming')
                               ? 'Coach access'
                               : style.label

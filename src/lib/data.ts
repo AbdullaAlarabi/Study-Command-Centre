@@ -476,6 +476,82 @@ export async function saveEssayReview({
   return { review, attempt: updatedAttempt, activityWarning: activityError?.message }
 }
 
+export async function resetLatestUnitAttempt({
+  studentId,
+  learningUnitId,
+  coachId,
+}: {
+  studentId: string
+  learningUnitId: string
+  coachId: string
+}) {
+  const { data: latest, error: latestError } = await client()
+    .from('attempts')
+    .select('*')
+    .eq('user_id', studentId)
+    .eq('learning_unit_id', learningUnitId)
+    .order('attempt_number', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (latestError) throw new Error(latestError.message)
+  if (!latest) throw new Error('No attempt is available to reset for this unit.')
+
+  const attempt = latest as Attempt
+  const { error: deleteError } = await client()
+    .from('attempts')
+    .delete()
+    .eq('id', attempt.id)
+    .eq('user_id', studentId)
+  if (deleteError) throw new Error(deleteError.message)
+
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: studentId,
+    action_type: 'coach_unit_reset',
+    entity_type: 'learning_unit',
+    entity_id: learningUnitId,
+    metadata_json: {
+      coach_id: coachId,
+      reset_attempt_id: attempt.id,
+      reset_attempt_number: attempt.attempt_number,
+      assessment_id: attempt.assessment_id,
+    },
+  })
+  return { resetAttempt: attempt, activityWarning: activityError?.message }
+}
+
+export async function unlockLearningUnit({
+  studentId,
+  learningUnitId,
+  assessmentId,
+  coachId,
+}: {
+  studentId: string
+  learningUnitId: string
+  assessmentId: string
+  coachId: string
+}) {
+  const { data: existing, error: existingError } = await client()
+    .from('activity_log')
+    .select('*')
+    .eq('user_id', studentId)
+    .eq('action_type', 'coach_unit_unlocked')
+    .eq('entity_type', 'learning_unit')
+    .eq('entity_id', learningUnitId)
+    .limit(1)
+    .maybeSingle()
+  if (existingError) throw new Error(existingError.message)
+  if (existing) return { activity: existing as ActivityLog, alreadyUnlocked: true }
+
+  const { data, error } = await client().from('activity_log').insert({
+    user_id: studentId,
+    action_type: 'coach_unit_unlocked',
+    entity_type: 'learning_unit',
+    entity_id: learningUnitId,
+    metadata_json: { coach_id: coachId, assessment_id: assessmentId },
+  }).select('*').single()
+  return { activity: unwrap(data as ActivityLog | null, error), alreadyUnlocked: false }
+}
+
 export async function startRevisionPracticeAttempt({
   userId,
   assessmentId,

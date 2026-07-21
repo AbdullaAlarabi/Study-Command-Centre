@@ -98,6 +98,19 @@ export function useStudentOverview(userId?: string) {
     )
   }, [data.activity, data.units])
 
+  const manuallyUnlockedUnitIds = useMemo(
+    () => new Set(
+      data.activity.flatMap((entry) =>
+        entry.action_type === 'coach_unit_unlocked' &&
+        entry.entity_type === 'learning_unit' &&
+        entry.entity_id
+          ? [entry.entity_id]
+          : [],
+      ),
+    ),
+    [data.activity],
+  )
+
   const completedUnitIds = useMemo(
     () => getCompletedUnitIds(data.units, data.attempts, manuallyCompletedUnitIds),
     [data.attempts, data.units, manuallyCompletedUnitIds],
@@ -146,5 +159,6 @@ export function useStudentOverview(userId?: string) {
     completedTaskIds,
     completedUnitIds,
     manuallyCompletedUnitIds,
+    manuallyUnlockedUnitIds,
   }
 }

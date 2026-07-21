@@ -184,6 +184,7 @@ export function getRoadmapUnitStatuses(
   units: UnitSnapshot[],
   attempts: AttemptSnapshot[],
   manuallyCompletedUnitIds: ReadonlySet<string> = new Set(),
+  manuallyUnlockedUnitIds: ReadonlySet<string> = new Set(),
 ) {
   const ordered = [...units].sort((a, b) => a.unlock_order - b.unlock_order)
   const current = getNextUnlockedUnit(ordered, attempts, manuallyCompletedUnitIds)
@@ -196,6 +197,7 @@ export function getRoadmapUnitStatuses(
       if (isUnitComplete(unit, attempts, manuallyCompletedUnitIds)) {
         return [unit.id, 'completed']
       }
+      if (manuallyUnlockedUnitIds.has(unit.id)) return [unit.id, 'current']
       if (unit.id === current?.id) return [unit.id, 'current']
       if (currentIndex >= 0 && index === currentIndex + 1) return [unit.id, 'upcoming']
       return [unit.id, 'locked']

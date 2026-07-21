@@ -61,6 +61,7 @@ export function LearningUnitGate({ children }: { children: ReactNode }) {
     assessmentUnits,
     overview.attempts,
     overview.manuallyCompletedUnitIds,
+    overview.manuallyUnlockedUnitIds,
   ).get(unit.id)
 
   if (status === 'locked' || status === 'upcoming') {
