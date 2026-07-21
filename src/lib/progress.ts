@@ -17,6 +17,7 @@ type AttemptSnapshot = Pick<
   | 'submitted_at'
   | 'objective_percentage'
   | 'essay_score'
+  | 'total_percentage'
 >
 
 type UnitSnapshot = Pick<
@@ -109,8 +110,9 @@ export function calculateReadiness(
     if (!latest) return []
 
     const objectiveScore = Number(latest.objective_percentage)
-    const score =
-      latest.essay_score === null
+    const score = latest.total_percentage !== null
+      ? Number(latest.total_percentage)
+      : latest.essay_score === null
         ? objectiveScore
         : (objectiveScore + Number(latest.essay_score)) / 2
     return [score]

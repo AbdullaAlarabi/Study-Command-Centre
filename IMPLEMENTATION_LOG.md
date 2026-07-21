@@ -173,3 +173,36 @@ Verification:
 - No tested page produced horizontal overflow, and coach preview exposed no completion action.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
+
+## Phase 7 — Verified academic content integration
+
+Status: complete on 21 July 2026.
+
+Implemented:
+
+- Audited and imported the supplied package as the only academic source: 2 course maps, 12 chapter packs, 12 question banks, 4 revision packs, 12 fixed mocks, and 12 answer keys.
+- Added deterministic Markdown parsing, stable-ID-to-UUID mapping, idempotent Supabase upserts, pre-import state documentation, and terminal summaries for inserted, updated, skipped, and invalid records.
+- Populated all 12 existing chapter pages and all four existing eight-section revision packs with exact supplied Markdown rendered through the current design system.
+- Reused the 144 supplied chapter MCQs and 48 essays for chapter gates, and reused the same MCQ banks for balanced 10-question mixed practice without duplicating academic records.
+- Updated provisional completion to require 4/5 MCQs plus a genuine non-empty essay response, with exact selected IDs, answers, duration, attempt number, and weak topics stored.
+- Imported 12 fixed papers in supplied order with 12 matching keys, student answer-key concealment before submission, objective grading, essay persistence, sequential Mock 1–3 unlocking, timers, and the documented MKT112 format notice.
+- Added live student results, objective-only pending wording, marked totals, Mock 1–3 progression, coach attempt history, supplied answer/model/marking views, numeric mock essay marks, optional feedback, activity, and readiness analytics.
+- Fixed the outer learning-unit gate so route changes reload attempt evidence instead of evaluating the next unit against a stale pre-submission snapshot.
+- Added a repeatable authenticated browser QA runner that uses short-lived sessions and removes only the exact temporary attempts and linked activity/reviews it creates.
+
+Verified data state:
+
+- 28/28 learning units contain approved academic content.
+- 282/282 academic question records are present: 192 chapter-bank questions and 90 fixed-mock questions.
+- A second import skipped all 28 unit records and all 282 questions with zero duplicates or invalid records.
+- Post-QA cleanup restored attempts, essay reviews, and activity to their pre-QA counts of zero.
+
+Verification:
+
+- `npm run content:audit`: passed with all required totals and zero errors.
+- `npm test`: 29/29 tests passed (18 regression tests and 11 Phase 7 integration tests).
+- Authenticated student and coach QA passed across 11 required page states at 390 × 844 and 1440 × 1000, producing 22 screenshots.
+- Pre-submission answer concealment and post-submission answer/model display passed.
+- Coach numeric marking, optional feedback, total-score update, and analytics passed.
+- `npm run typecheck`: passed.
+- `npm run build`: passed.

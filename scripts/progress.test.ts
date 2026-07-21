@@ -82,6 +82,11 @@ test('readiness uses the latest eligible result and optional essay score', () =>
   assert.equal(calculateReadiness(units, attempts), 70)
 })
 
+test('readiness uses the weighted marked total when coach marking is complete', () => {
+  const attempts = [attempt({ objective_percentage: 100, essay_score: 60, total_percentage: 76 })]
+  assert.equal(calculateReadiness(units, attempts), 76)
+})
+
 test('overdue count ignores completed tasks', () => {
   const tasks = [
     { id: 'past-open', task_date: '2026-07-19' },

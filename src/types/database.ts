@@ -36,6 +36,26 @@ export interface AssessmentBlock {
 }
 
 export interface StudyPackContent {
+  academicContentVersion?: number
+  academicFormat?: 'markdown-v1'
+  stableId?: string
+  contentType?: 'chapter_pack' | 'assessment_revision_pack' | 'mock_exam'
+  sourceFile?: string
+  sourceMetadata?: Record<string, unknown>
+  markdownBody?: string
+  markdownSections?: Array<{ id: string; title: string; markdown: string }>
+  questionBankStableId?: string
+  questionBankSourceFile?: string
+  questionIds?: string[]
+  answerKeyStableId?: string
+  answerKeySourceFile?: string
+  answerKeyMarkdown?: string
+  answerKeyMetadata?: Record<string, unknown>
+  timeMinutes?: number
+  chapters?: number[]
+  examStructure?: string
+  examStructureBasis?: string
+  formatStatus?: 'documented-project-assumption' | 'official-syllabus'
   overview?: string
   keyDefinitions?: Array<{ term: string; definition: string }>
   mainIdeas?: string[]
@@ -108,6 +128,8 @@ export interface AttemptAnswer {
   questionId: string
   answer: string
   isCorrect?: boolean
+  coachMark?: number
+  coachFeedback?: string
 }
 
 export interface Attempt {

@@ -1,11 +1,3 @@
-import {
-  Activity,
-  BarChart3,
-  ClipboardList,
-  FileSearch,
-  MessageSquareText,
-  Timer,
-} from 'lucide-react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { RequireRole } from './features/auth/RequireRole'
@@ -14,14 +6,18 @@ import { LearningUnitGate } from './features/student/LearningUnitGate'
 import { AppShell } from './layouts/AppShell'
 import { RoleAwareAppShell } from './layouts/RoleAwareAppShell'
 import { CoachShellPage } from './pages/CoachShellPage'
+import { CoachActivityPage } from './pages/CoachActivityPage'
+import { CoachAttemptDetailPage } from './pages/CoachAttemptDetailPage'
+import { CoachAttemptsPage } from './pages/CoachAttemptsPage'
 import { ChapterQuizPage } from './pages/ChapterQuizPage'
 import { ChapterStudyPage } from './pages/ChapterStudyPage'
 import { LoginPage } from './pages/LoginPage'
+import { MockExamPage } from './pages/MockExamPage'
 import { NotFoundPage } from './pages/NotFoundPage'
-import { PhasePlaceholderPage } from './pages/PhasePlaceholderPage'
 import { RevisionCentrePage } from './pages/RevisionCentrePage'
 import { RevisionPage } from './pages/RevisionPage'
 import { StudentRoadmapPage } from './pages/StudentRoadmapPage'
+import { StudentResultsPage } from './pages/StudentResultsPage'
 import { StudentShellPage } from './pages/StudentShellPage'
 
 function HomeRoute() {
@@ -58,20 +54,7 @@ export default function App() {
           path="revision"
           element={<RevisionCentrePage />}
         />
-        <Route
-          path="results"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Results"
-              title="Your evidence of progress"
-              description="Quiz attempts, mock results, and weak topics will appear after real submissions."
-              emptyTitle="No results yet"
-              emptyDescription="This is an honest empty state. No placeholder scores have been created."
-              icon={BarChart3}
-              homeTo="/student"
-            />
-          }
-        />
+        <Route path="results" element={<StudentResultsPage />} />
       </Route>
       <Route
         element={
@@ -112,15 +95,7 @@ export default function App() {
           path="/student/mock/:unitId"
           element={
             <LearningUnitGate>
-              <PhasePlaceholderPage
-                eyebrow="Mock exam"
-                title="Exam rehearsal"
-                description="Diagnostic, timed, and final-rehearsal modes will use the configured assessment format."
-                emptyTitle="Mock engine arrives in Phase 7"
-                emptyDescription="Timer, answer backup, grading, and sequential unlock behavior are not simulated in this shell phase."
-                icon={Timer}
-                homeTo="/student"
-              />
+              <MockExamPage />
             </LearningUnitGate>
           }
         />
@@ -134,62 +109,10 @@ export default function App() {
         }
       >
         <Route index element={<CoachShellPage />} />
-        <Route
-          path="attempts"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Quiz and mock attempts"
-              title="Attempt history"
-              description="Review every submitted answer without asking the student for screenshots."
-              emptyTitle="No attempts yet"
-              emptyDescription="Attempt monitoring is implemented with the coach analytics in Phase 8."
-              icon={ClipboardList}
-              homeTo="/coach"
-            />
-          }
-        />
-        <Route
-          path="attempts/:attemptId"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Attempt details"
-              title="Submitted answers"
-              description="Objective responses, essays, feedback, and weak topics will be visible here."
-              emptyTitle="Attempt details are not available yet"
-              emptyDescription="This route is reserved for real submitted attempts in Phase 8."
-              icon={FileSearch}
-              homeTo="/coach"
-            />
-          }
-        />
-        <Route
-          path="essays"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Essay review"
-              title="Essays awaiting review"
-              description="Add concise feedback and an optional score without blocking student progress."
-              emptyTitle="No essays awaiting review"
-              emptyDescription="Essay review controls are added with the coach dashboard in Phase 8."
-              icon={MessageSquareText}
-              homeTo="/coach"
-            />
-          }
-        />
-        <Route
-          path="activity"
-          element={
-            <PhasePlaceholderPage
-              eyebrow="Activity"
-              title="Recent student activity"
-              description="Starts, submissions, reviews, resets, and completions will form a clear timeline."
-              emptyTitle="No activity to show"
-              emptyDescription="The live activity query and monitoring view arrive in Phase 8."
-              icon={Activity}
-              homeTo="/coach"
-            />
-          }
-        />
+        <Route path="attempts" element={<CoachAttemptsPage />} />
+        <Route path="attempts/:attemptId" element={<CoachAttemptDetailPage />} />
+        <Route path="essays" element={<CoachAttemptsPage essaysOnly />} />
+        <Route path="activity" element={<CoachActivityPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

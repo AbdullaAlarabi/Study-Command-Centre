@@ -64,13 +64,12 @@ test('essay word count handles repeated whitespace', () => {
   assert.equal(countEssayWords(''), 0)
 })
 
-test('pass requires at least four correct MCQs and a sixty-word essay', () => {
+test('pass requires at least four correct MCQs and a non-empty essay', () => {
   const selected = [...bank.slice(0, 5), bank[12]]
-  const sixtyWords = Array.from({ length: 60 }, () => 'word').join(' ')
   const passingAnswers = Object.fromEntries([
     ...selected.slice(0, 4).map((item) => [item.id, 'A']),
     [selected[4].id, 'B'],
-    [selected[5].id, sixtyWords],
+    [selected[5].id, 'A genuine submitted essay response.'],
   ])
   assert.equal(gradeChapterQuiz(selected, passingAnswers).passed, true)
   assert.equal(
@@ -78,7 +77,7 @@ test('pass requires at least four correct MCQs and a sixty-word essay', () => {
     false,
   )
   assert.equal(
-    gradeChapterQuiz(selected, { ...passingAnswers, [selected[5].id]: 'too short' }).passed,
+    gradeChapterQuiz(selected, { ...passingAnswers, [selected[5].id]: '   ' }).passed,
     false,
   )
 })

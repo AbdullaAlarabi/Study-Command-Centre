@@ -40,6 +40,18 @@ The seed is idempotent and verifies the database contains at least:
 - 28 learning units
 - 0 schedule tasks until the approved schedule phase
 
+## Approved academic content
+
+`STUDY_COMMAND_CENTRE_ACADEMIC_CONTENT/` is the sole academic source for MKT112 and MGT112. Do not edit supplied wording or stable IDs in the application layer.
+
+1. Validate the package: `npm run content:audit`
+2. Import it with the local service role: `npm run content:import`
+3. Safely rerun the import whenever supplied files are corrected; unchanged records are skipped and stable IDs update in place.
+4. Run all regression and integration tests: `npm test`
+5. Run authenticated production-build QA with installed Google Chrome: `npm run qa:phase7`
+
+The Phase 7 import populates 28 existing learning units and 282 question records: 144 chapter-bank MCQs, 48 chapter-bank essays, 60 fixed-mock MCQs, and 30 fixed-mock essays. It does not create a parallel content schema.
+
 You can verify the core rows in SQL Editor:
 
 ```sql

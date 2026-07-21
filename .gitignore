@@ -9,3 +9,4 @@ dist/
 
 *.log
 coverage/
+reports/phase7-qa/

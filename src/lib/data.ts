@@ -5,6 +5,7 @@ import type {
   Attempt,
   Course,
   LearningUnit,
+  EssayReview,
   ProfileRow,
   Question,
   QuestionScope,
@@ -32,6 +33,11 @@ export async function getProfile(userId: string) {
     .eq('id', userId)
     .single()
   return unwrap(data as ProfileRow | null, error)
+}
+
+export async function getProfiles() {
+  const { data, error } = await client().from('profiles').select('*').order('created_at')
+  return unwrap(data as ProfileRow[] | null, error)
 }
 
 export async function getCourses() {
@@ -129,10 +135,27 @@ export async function getRevisionPracticeQuestions(assessmentId: string) {
     .from('questions')
     .select('*')
     .eq('assessment_id', assessmentId)
-    .eq('question_scope', 'revision_practice')
+    .eq('question_scope', 'chapter_quiz')
     .eq('question_type', 'mcq')
     .eq('is_active', true)
     .order('display_order')
+  return unwrap(data as Question[] | null, error)
+}
+
+export async function getMockQuestions(learningUnitId: string) {
+  const { data, error } = await client()
+    .from('questions')
+    .select('*')
+    .eq('learning_unit_id', learningUnitId)
+    .eq('question_scope', 'mock')
+    .eq('is_active', true)
+    .order('display_order')
+  return unwrap(data as Question[] | null, error)
+}
+
+export async function getQuestionsByIds(ids: string[]) {
+  if (ids.length === 0) return []
+  const { data, error } = await client().from('questions').select('*').in('id', ids)
   return unwrap(data as Question[] | null, error)
 }
 
@@ -289,6 +312,168 @@ async function getNextAttemptNumber(userId: string, learningUnitId: string) {
 
   if (error) throw new Error(error.message)
   return Number(data?.attempt_number ?? 0) + 1
+}
+
+export async function startMockAttempt({
+  userId,
+  assessmentId,
+  learningUnitId,
+  selectedQuestionIds,
+}: {
+  userId: string
+  assessmentId: string
+  learningUnitId: string
+  selectedQuestionIds: string[]
+}) {
+  const attemptNumber = await getNextAttemptNumber(userId, learningUnitId)
+  const { data, error } = await client()
+    .from('attempts')
+    .insert({
+      user_id: userId,
+      assessment_id: assessmentId,
+      learning_unit_id: learningUnitId,
+      attempt_number: attemptNumber,
+      status: 'in_progress',
+      started_at: new Date().toISOString(),
+      selected_question_ids: selectedQuestionIds,
+      answers_json: {},
+      mcq_correct: 0,
+      mcq_total: 5,
+      objective_percentage: 0,
+      essay_word_count: 0,
+      weak_topics_json: [],
+    })
+    .select('*')
+    .single()
+  const attempt = unwrap(data as Attempt | null, error)
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: userId,
+    action_type: 'mock_started',
+    entity_type: 'attempt',
+    entity_id: attempt.id,
+    metadata_json: {
+      assessment_id: assessmentId,
+      learning_unit_id: learningUnitId,
+      attempt_number: attemptNumber,
+    },
+  })
+  return { attempt, activityWarning: activityError?.message }
+}
+
+export async function submitMockAttempt({
+  attemptId,
+  userId,
+  answers,
+  mcqCorrect,
+  objectivePercentage,
+  essayWordCount,
+  weakTopics,
+  durationSeconds,
+}: {
+  attemptId: string
+  userId: string
+  answers: Attempt['answers_json']
+  mcqCorrect: number
+  objectivePercentage: number
+  essayWordCount: number
+  weakTopics: string[]
+  durationSeconds: number
+}) {
+  const { data, error } = await client()
+    .from('attempts')
+    .update({
+      status: 'submitted',
+      submitted_at: new Date().toISOString(),
+      answers_json: answers,
+      mcq_correct: mcqCorrect,
+      mcq_total: 5,
+      objective_percentage: objectivePercentage,
+      essay_word_count: essayWordCount,
+      weak_topics_json: weakTopics,
+      duration_seconds: durationSeconds,
+    })
+    .eq('id', attemptId)
+    .eq('user_id', userId)
+    .eq('status', 'in_progress')
+    .select('*')
+    .single()
+  const attempt = unwrap(data as Attempt | null, error)
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: userId,
+    action_type: 'mock_submitted',
+    entity_type: 'attempt',
+    entity_id: attempt.id,
+    metadata_json: {
+      assessment_id: attempt.assessment_id,
+      learning_unit_id: attempt.learning_unit_id,
+      attempt_number: attempt.attempt_number,
+      objective_percentage: objectivePercentage,
+      weak_topics: weakTopics,
+    },
+  })
+  return { attempt, activityWarning: activityError?.message }
+}
+
+export async function getAttemptById(attemptId: string) {
+  const { data, error } = await client().from('attempts').select('*').eq('id', attemptId).single()
+  return unwrap(data as Attempt | null, error)
+}
+
+export async function getEssayReview(attemptId: string) {
+  const { data, error } = await client().from('essay_reviews').select('*').eq('attempt_id', attemptId).maybeSingle()
+  if (error) throw new Error(error.message)
+  return data as EssayReview | null
+}
+
+export async function saveEssayReview({
+  attempt,
+  coachId,
+  answers,
+  essayScore,
+  totalPercentage,
+  feedback,
+}: {
+  attempt: Attempt
+  coachId: string
+  answers: Attempt['answers_json']
+  essayScore: number
+  totalPercentage: number
+  feedback: string
+}) {
+  const reviewedAt = new Date().toISOString()
+  const { data: reviewData, error: reviewError } = await client()
+    .from('essay_reviews')
+    .upsert({
+      attempt_id: attempt.id,
+      coach_id: coachId,
+      score: essayScore,
+      feedback: feedback.trim() || null,
+      reviewed_at: reviewedAt,
+    }, { onConflict: 'attempt_id' })
+    .select('*')
+    .single()
+  const review = unwrap(reviewData as EssayReview | null, reviewError)
+  const { data: attemptData, error: attemptError } = await client()
+    .from('attempts')
+    .update({ answers_json: answers, essay_score: essayScore, total_percentage: totalPercentage })
+    .eq('id', attempt.id)
+    .select('*')
+    .single()
+  const updatedAttempt = unwrap(attemptData as Attempt | null, attemptError)
+  const { error: activityError } = await client().from('activity_log').insert({
+    user_id: attempt.user_id,
+    action_type: 'essay_reviewed',
+    entity_type: 'attempt',
+    entity_id: attempt.id,
+    metadata_json: {
+      assessment_id: attempt.assessment_id,
+      learning_unit_id: attempt.learning_unit_id,
+      essay_score: essayScore,
+      total_percentage: totalPercentage,
+      coach_id: coachId,
+    },
+  })
+  return { review, attempt: updatedAttempt, activityWarning: activityError?.message }
 }
 
 export async function startRevisionPracticeAttempt({

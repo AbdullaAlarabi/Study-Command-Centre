@@ -358,7 +358,7 @@ export function ChapterQuizPage() {
   const essayCount = questionBank.filter((question) => question.question_type === 'essay').length
   if (mcqCount < 5 || essayCount < 1) {
     return (
-      <PageContainer eyebrow={`Chapter ${unit.chapter_number ?? ''} quiz`} title={unit.title} description="Five multiple-choice questions and one essay are required for this gate.">
+      <PageContainer eyebrow={`Chapter ${unit.chapter_number ?? ''} quiz`} title={unit.title} description="Five multiple-choice questions and one submitted essay are required for this gate.">
         <EmptyState
           title="Question bank not populated yet"
           description={`This chapter currently has ${mcqCount} active MCQs and ${essayCount} active essays. It needs at least 5 MCQs and 1 essay before an attempt can begin.`}
@@ -475,7 +475,7 @@ export function ChapterQuizPage() {
 
   if (!attempt || !activeQuestion) {
     return (
-      <PageContainer eyebrow={`Chapter ${unit.chapter_number ?? ''} quiz`} title={unit.title} description="Answer five multiple-choice questions and submit an essay of at least 60 words.">
+      <PageContainer eyebrow={`Chapter ${unit.chapter_number ?? ''} quiz`} title={unit.title} description="Answer five multiple-choice questions and submit a genuine essay response.">
         <div className="mx-auto max-w-3xl space-y-5">
           {submitError && <ErrorState title="Could not start the quiz" message={submitError} />}
           <section className="rounded-card border border-navy/10 bg-surface p-6 shadow-card sm:p-8">
@@ -483,7 +483,7 @@ export function ChapterQuizPage() {
             <h2 className="mt-5 text-xl font-bold text-navy">Ready for the chapter gate?</h2>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
               <li className="flex gap-3"><Check className="mt-1 shrink-0 text-teal-700" aria-hidden="true" size={17} />Five MCQs and one essay, shown one at a time.</li>
-              <li className="flex gap-3"><Check className="mt-1 shrink-0 text-teal-700" aria-hidden="true" size={17} />Pass with at least 4 of 5 MCQs correct and a 60-word essay.</li>
+              <li className="flex gap-3"><Check className="mt-1 shrink-0 text-teal-700" aria-hidden="true" size={17} />Pass with at least 4 of 5 MCQs correct and a submitted essay response.</li>
               <li className="flex gap-3"><Save className="mt-1 shrink-0 text-teal-700" aria-hidden="true" size={17} />Your work is backed up on this device until submission succeeds.</li>
             </ul>
             <button className="mt-7 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-navy px-5 font-bold text-white hover:bg-navy-800 disabled:cursor-not-allowed disabled:opacity-60" type="button" disabled={starting} onClick={() => void handleStart()}>
@@ -499,7 +499,7 @@ export function ChapterQuizPage() {
   const isEssay = activeQuestion.question_type === 'essay'
   const activeAnswer = answers[activeQuestion.id] ?? ''
   const activeEssayWords = isEssay ? countEssayWords(activeAnswer) : 0
-  const activeInvalid = validationVisible && (isEssay ? activeEssayWords < 60 : !activeAnswer)
+  const activeInvalid = validationVisible && (isEssay ? !activeAnswer.trim() : !activeAnswer)
 
   return (
     <PageContainer eyebrow={`Attempt ${attempt.attempt_number}`} title={unit.title} description="Your answers are saved on this device while the quiz is in progress." actions={<StatusBadge status="on-track" label={`${answeredCount} of 6 answered`} />}>
@@ -517,7 +517,7 @@ export function ChapterQuizPage() {
             {selectedQuestions.map((question, index) => {
               const answered = Boolean(answers[question.id]?.trim())
               const selected = index === currentIndex
-              const invalid = validationVisible && (question.question_type === 'essay' ? countEssayWords(answers[question.id] ?? '') < 60 : !answered)
+              const invalid = validationVisible && !answered
               return (
                 <button
                   key={question.id}
@@ -536,7 +536,7 @@ export function ChapterQuizPage() {
 
         <section className={`rounded-card border bg-surface p-5 shadow-card sm:p-8 ${activeInvalid ? 'border-risk/35' : 'border-navy/10'}`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <StatusBadge status={isEssay ? 'needs-attention' : 'on-track'} label={isEssay ? 'Essay · 60 words minimum' : `Multiple choice · ${activeQuestion.topic}`} />
+            <StatusBadge status={isEssay ? 'needs-attention' : 'on-track'} label={isEssay ? 'Essay response' : `Multiple choice · ${activeQuestion.topic}`} />
             <span className="text-xs font-semibold text-muted">Required</span>
           </div>
           <h2 className="mt-6 text-lg font-bold leading-7 text-navy sm:text-xl">{activeQuestion.prompt}</h2>
@@ -552,8 +552,8 @@ export function ChapterQuizPage() {
                 onChange={(event) => setAnswers((current) => ({ ...current, [activeQuestion.id]: event.target.value }))}
               />
               <div className="mt-2 flex items-center justify-between gap-3">
-                <p className={`text-sm font-semibold ${activeEssayWords >= 60 ? 'text-teal-700' : activeInvalid ? 'text-risk' : 'text-muted'}`}>{activeEssayWords} / 60 words minimum</p>
-                {activeEssayWords >= 60 && <span className="flex items-center gap-1 text-sm font-semibold text-teal-700"><Check aria-hidden="true" size={16} /> Ready</span>}
+                <p className={`text-sm font-semibold ${activeEssayWords > 0 ? 'text-teal-700' : activeInvalid ? 'text-risk' : 'text-muted'}`}>{activeEssayWords} {activeEssayWords === 1 ? 'word' : 'words'}</p>
+                {activeEssayWords > 0 && <span className="flex items-center gap-1 text-sm font-semibold text-teal-700"><Check aria-hidden="true" size={16} /> Response added</span>}
               </div>
             </div>
           ) : (
@@ -576,14 +576,14 @@ export function ChapterQuizPage() {
           {activeInvalid && (
             <p role="alert" className="mt-4 flex items-start gap-2 text-sm font-semibold text-risk">
               <AlertCircle className="mt-0.5 shrink-0" aria-hidden="true" size={17} />
-              {isEssay ? 'Add enough detail to reach at least 60 words.' : 'Choose an answer before submitting.'}
+              {isEssay ? 'Write a genuine response before submitting.' : 'Choose an answer before submitting.'}
             </p>
           )}
         </section>
 
         {validationVisible && !validation.valid && (
           <div role="alert" className="rounded-xl border border-risk/20 bg-risk-50 p-4 text-sm leading-6 text-risk-700">
-            Complete all five MCQs and write at least 60 essay words. You can use the numbered buttons to jump to anything missing.
+            Complete all five MCQs and add an essay response. You can use the numbered buttons to jump to anything missing.
           </div>
         )}
 

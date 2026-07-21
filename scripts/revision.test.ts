@@ -76,6 +76,15 @@ test('mixed practice selects ten unique MCQs and includes every chapter', () => 
   assert.equal(selected.length, 10)
   assert.equal(new Set(selected.map((item) => item.id)).size, 10)
   assert.deepEqual(new Set(selected.map((item) => item.learning_unit_id)), new Set(['chapter-1', 'chapter-2', 'chapter-3']))
+  assert.deepEqual(
+    ['chapter-1', 'chapter-2', 'chapter-3'].map((chapter) => selected.filter((item) => item.learning_unit_id === chapter).length),
+    [4, 3, 3],
+  )
+  const rotated = selectRevisionPracticeQuestions(bank, [], () => 0.4, 1)
+  assert.deepEqual(
+    ['chapter-1', 'chapter-2', 'chapter-3'].map((chapter) => rotated.filter((item) => item.learning_unit_id === chapter).length),
+    [3, 4, 3],
+  )
 })
 
 test('mixed practice prioritizes frequently weak topics', () => {

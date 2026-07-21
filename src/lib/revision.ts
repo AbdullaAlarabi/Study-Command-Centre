@@ -56,11 +56,12 @@ export function selectRevisionPracticeQuestions(
   questions: Question[],
   weakTopics: WeakTopicCount[] = [],
   random: () => number = Math.random,
+  rotationIndex = 0,
 ) {
   const pool = questions.filter(
     (question) =>
       question.is_active &&
-      question.question_scope === 'revision_practice' &&
+      ['chapter_quiz', 'revision_practice'].includes(question.question_scope) &&
       question.question_type === 'mcq',
   )
 
@@ -80,15 +81,29 @@ export function selectRevisionPracticeQuestions(
   const selectedIds = new Set<string>()
 
   const chapterIds = [...new Set(ranked.flatMap((question) => question.learning_unit_id ?? []))]
-  chapterIds.forEach((chapterId) => {
-    const bestForChapter = ranked.find(
-      (question) => question.learning_unit_id === chapterId && !selectedIds.has(question.id),
-    )
-    if (bestForChapter && selected.length < 10) {
-      selected.push(bestForChapter)
-      selectedIds.add(bestForChapter.id)
-    }
-  })
+  if (chapterIds.length === 3) {
+    const extraChapterIndex = ((rotationIndex % 3) + 3) % 3
+    chapterIds.forEach((chapterId, chapterIndex) => {
+      const target = chapterIndex === extraChapterIndex ? 4 : 3
+      ranked
+        .filter((question) => question.learning_unit_id === chapterId)
+        .slice(0, target)
+        .forEach((question) => {
+          selected.push(question)
+          selectedIds.add(question.id)
+        })
+    })
+  } else {
+    chapterIds.forEach((chapterId) => {
+      const bestForChapter = ranked.find(
+        (question) => question.learning_unit_id === chapterId && !selectedIds.has(question.id),
+      )
+      if (bestForChapter && selected.length < 10) {
+        selected.push(bestForChapter)
+        selectedIds.add(bestForChapter.id)
+      }
+    })
+  }
 
   ranked.forEach((question) => {
     if (selected.length < 10 && !selectedIds.has(question.id)) {

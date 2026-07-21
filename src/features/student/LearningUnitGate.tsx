@@ -1,5 +1,5 @@
 import { LockKeyhole } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { EmptyState } from '../../components/EmptyState'
 import { ErrorState } from '../../components/ErrorState'
 import { LoadingState } from '../../components/LoadingState'
@@ -13,6 +13,14 @@ export function LearningUnitGate({ children }: { children: ReactNode }) {
   const { unitId } = useParams()
   const { user, profile } = useAuth()
   const overview = useStudentOverview(profile?.role === 'student' ? user?.id : undefined)
+
+  useEffect(() => {
+    if (profile?.role === 'student' && user?.id && unitId) void overview.reload()
+    // A passed attempt is saved inside the child route. Refresh the outer gate
+    // whenever the route advances so it never evaluates the next unit against
+    // the pre-submission snapshot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.role, unitId, user?.id])
 
   if (profile?.role === 'coach') return children
 

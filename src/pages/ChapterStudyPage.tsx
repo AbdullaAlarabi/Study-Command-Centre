@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { AcademicMarkdown } from '../components/AcademicMarkdown'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorState } from '../components/ErrorState'
 import { LoadingState } from '../components/LoadingState'
@@ -79,7 +80,9 @@ export function ChapterStudyPage() {
 
   const content = unit.content_json
   const hasContent = Boolean(
-    content.overview ||
+    content.markdownSections?.length ||
+      content.markdownBody ||
+      content.overview ||
       content.keyDefinitions?.length ||
       content.mainIdeas?.length ||
       content.processesOrModels?.length ||
@@ -105,6 +108,18 @@ export function ChapterStudyPage() {
             actionLabel="Return to roadmap"
             actionTo="/student/roadmap"
           />
+        )}
+
+        {content.markdownSections?.map((section) => (
+          <SectionCard key={section.id} title={section.title} icon={BookOpenCheck}>
+            <AcademicMarkdown markdown={section.markdown} />
+          </SectionCard>
+        ))}
+
+        {!content.markdownSections?.length && content.markdownBody && (
+          <SectionCard title="Approved chapter pack" icon={BookOpenCheck}>
+            <AcademicMarkdown markdown={content.markdownBody} />
+          </SectionCard>
         )}
 
         {content.overview && (

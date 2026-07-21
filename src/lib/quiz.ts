@@ -105,8 +105,9 @@ export function gradeChapterQuiz(
     else if (question.topic) weakTopics.add(question.topic)
   })
 
-  const essayWordCount = countEssayWords(essay ? (answers[essay.id] ?? '') : '')
-  const essaySubmitted = essayWordCount >= 60
+  const essayAnswer = essay ? (answers[essay.id] ?? '').trim() : ''
+  const essayWordCount = countEssayWords(essayAnswer)
+  const essaySubmitted = Boolean(essayAnswer)
   const mcqTotal = mcqs.length
   const objectivePercentage = mcqTotal
     ? Math.round((mcqCorrect / mcqTotal) * 10_000) / 100
@@ -137,6 +138,6 @@ export function getQuizValidation(
     unansweredMcqs,
     essayWordCount,
     essayPresent: Boolean(essay && answers[essay.id]?.trim()),
-    valid: mcqs.length === 5 && unansweredMcqs === 0 && essayWordCount >= 60,
+    valid: mcqs.length === 5 && unansweredMcqs === 0 && Boolean(essay && answers[essay.id]?.trim()),
   }
 }

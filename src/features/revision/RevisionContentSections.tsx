@@ -8,9 +8,11 @@ import {
   MessageSquareText,
   NotebookTabs,
   Route,
+  FileText,
   type LucideIcon,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { AcademicMarkdown } from '../../components/AcademicMarkdown'
 import type { StudyPackContent } from '../../types/database'
 
 export interface RevisionSectionDefinition {
@@ -19,6 +21,9 @@ export interface RevisionSectionDefinition {
 }
 
 export function getPresentRevisionSectionIds(content: StudyPackContent) {
+  if (content.markdownSections?.length) {
+    return content.markdownSections.map((section) => section.id)
+  }
   return [
     content.assessmentOverview && 'assessmentOverview',
     content.chapterSummaries?.length && 'chapterSummaries',
@@ -75,6 +80,25 @@ export function RevisionContentSections({
   openedSectionIds: ReadonlySet<string>
   onOpen: (id: string) => void
 }) {
+  if (content.markdownSections?.length) {
+    return (
+      <div className="space-y-4">
+        {content.markdownSections.map((section) => (
+          <RevisionSection
+            key={section.id}
+            id={section.id}
+            title={section.title}
+            icon={FileText}
+            opened={openedSectionIds.has(section.id)}
+            onOpen={onOpen}
+          >
+            <AcademicMarkdown markdown={section.markdown} />
+          </RevisionSection>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       {content.assessmentOverview && (

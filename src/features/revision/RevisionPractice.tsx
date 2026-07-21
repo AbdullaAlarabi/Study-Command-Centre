@@ -161,7 +161,18 @@ export function RevisionPractice({
     setError('')
     setNotice('')
     try {
-      const selected = selectRevisionPracticeQuestions(questions, weakTopics)
+      const completedPracticeCount = attempts.filter(
+        (candidate) =>
+          candidate.learning_unit_id === unit.id &&
+          candidate.status === 'submitted' &&
+          candidate.mcq_total === 10,
+      ).length
+      const selected = selectRevisionPracticeQuestions(
+        questions,
+        weakTopics,
+        Math.random,
+        completedPracticeCount,
+      )
       const started = await startRevisionPracticeAttempt({
         userId,
         assessmentId: unit.assessment_id,
