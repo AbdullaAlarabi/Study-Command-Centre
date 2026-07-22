@@ -425,6 +425,13 @@ export async function getEssayReview(attemptId: string) {
   return data as EssayReview | null
 }
 
+export async function getEssayReviews(attemptIds: string[]) {
+  if (attemptIds.length === 0) return []
+  const { data, error } = await client().from('essay_reviews').select('*').in('attempt_id', attemptIds)
+  if (error) throw new Error(error.message)
+  return data as EssayReview[]
+}
+
 export async function saveEssayReview({
   attempt,
   coachId,

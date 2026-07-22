@@ -7,6 +7,7 @@ import { StatCard } from '../components/StatCard'
 import { StatusBadge } from '../components/StatusBadge'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useStudentOverview } from '../features/student/useStudentOverview'
+import { getEssayFeedbackSummary } from '../lib/essay'
 import { calculateReadiness } from '../lib/progress'
 
 function formatDateTime(value: string) {
@@ -66,6 +67,10 @@ export function StudentResultsPage() {
             {submitted.map((attempt) => {
               const unit = unitById.get(attempt.learning_unit_id)
               const hasEssay = attempt.essay_word_count > 0
+              const review = overview.essayReviews.find((candidate) => candidate.attempt_id === attempt.id)
+              const coachFeedback = review?.feedback ?? Object.values(attempt.answers_json).find((answer) => answer.coachFeedback)?.coachFeedback ?? null
+              const feedbackSummary = getEssayFeedbackSummary({ feedback: coachFeedback, score: review?.score ?? attempt.essay_score })
+              const feedbackVisible = feedbackSummary.hasFeedback || review?.score !== null || attempt.essay_score !== null
               return (
                 <article key={attempt.id} className="rounded-card border border-navy/10 bg-surface p-5 shadow-card">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -73,6 +78,14 @@ export function StudentResultsPage() {
                     {hasEssay && attempt.essay_score === null ? <StatusBadge status="pending" label="Objective available · essays pending" /> : <StatusBadge status={attempt.status === 'failed' ? 'needs-attention' : 'complete'} label={attempt.total_percentage === null ? `${attempt.objective_percentage}% objective` : `${attempt.total_percentage}% total`} />}
                   </div>
                   <div className="mt-5 grid gap-3 sm:grid-cols-3"><p className="rounded-xl bg-navy-50 p-3 text-sm text-slate-700"><strong>Objective:</strong> {attempt.mcq_correct}/{attempt.mcq_total} ({attempt.objective_percentage}%)</p><p className="rounded-xl bg-navy-50 p-3 text-sm text-slate-700"><strong>Essay:</strong> {attempt.essay_score === null ? (hasEssay ? 'Marking pending' : 'Not applicable') : `${attempt.essay_score}%`}</p><p className="rounded-xl bg-navy-50 p-3 text-sm text-slate-700"><strong>Total:</strong> {attempt.total_percentage === null ? 'Pending / not applicable' : `${attempt.total_percentage}%`}</p></div>
+                  {feedbackVisible && (
+                    <div className="mt-4 rounded-xl border border-teal/20 bg-teal-50 p-4">
+                      <p className="text-sm font-bold text-teal-800">Coach feedback</p>
+                      {feedbackSummary.score !== null && <p className="mt-2 text-sm text-slate-700"><strong>Essay score:</strong> {feedbackSummary.score}%</p>}
+                      {feedbackSummary.hasFeedback && <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-700">{feedbackSummary.feedback}</p>}
+                      {!feedbackSummary.hasFeedback && (review?.score !== null || attempt.essay_score !== null) && <p className="mt-2 text-sm text-slate-700">The coach has marked this essay, but no written feedback was added.</p>}
+                    </div>
+                  )}
                 </article>
               )
             })}

@@ -6,6 +6,7 @@ import {
   getAssessmentBlocks,
   getAttempts,
   getCourses,
+  getEssayReviews,
   getStudyTasks,
 } from '../../lib/data'
 import { getCompletedUnitIds } from '../../lib/progress'
@@ -14,6 +15,7 @@ import type {
   AssessmentBlock,
   Attempt,
   Course,
+  EssayReview,
   LearningUnit,
   StudyTask,
 } from '../../types/database'
@@ -25,6 +27,7 @@ interface StudentOverviewData {
   tasks: StudyTask[]
   attempts: Attempt[]
   activity: ActivityLog[]
+  essayReviews: EssayReview[]
 }
 
 const initialData: StudentOverviewData = {
@@ -34,6 +37,7 @@ const initialData: StudentOverviewData = {
   tasks: [],
   attempts: [],
   activity: [],
+  essayReviews: [],
 }
 
 export function useStudentOverview(userId?: string) {
@@ -56,7 +60,8 @@ export function useStudentOverview(userId?: string) {
         getAttempts(userId),
         getActivity(userId, 500),
       ])
-      setData({ courses, assessments, units, tasks, attempts, activity })
+      const essayReviews = attempts.length > 0 ? await getEssayReviews(attempts.map((attempt) => attempt.id)) : []
+      setData({ courses, assessments, units, tasks, attempts, activity, essayReviews })
     } catch (caughtError) {
       setError(
         caughtError instanceof Error ? caughtError.message : 'Could not load the student overview.',
